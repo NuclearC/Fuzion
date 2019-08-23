@@ -10,6 +10,7 @@
 #include "../Utils/entity.h"
 #include "../Utils/xorstring.h"
 #include "../Hooks/hooks.h"
+#include "../Hacks/backtrack.h"
 
 #include "../ATGUI/texture.h"
 #include "../Resources/tux.h"
@@ -588,7 +589,7 @@ static void DrawSkeleton( C_BasePlayer* player, C_BasePlayer* localplayer ) {
 	studiohdr_t* pStudioModel = modelInfo->GetStudioModel( player->GetModel() );
 	if ( !pStudioModel )
 		return;
-
+		
 	static matrix3x4_t pBoneToWorldOut[128];
 	if ( !player->SetupBones( pBoneToWorldOut, 128, 256, 0 ) )
 		return;
@@ -609,6 +610,20 @@ static void DrawSkeleton( C_BasePlayer* player, C_BasePlayer* localplayer ) {
 		Draw::AddLine( vBonePos1.x, vBonePos1.y, vBonePos2.x, vBonePos2.y, Entity::IsTeamMate(player, localplayer) ? Settings::ESP::Skeleton::allyColor.Color() : Settings::ESP::Skeleton::enemyColor.Color());
 	}
 }
+
+static void DrawBackTrack( C_BasePlayer* player, bool draw_headdot = true, bool draw_skeleton = false) {
+	Vector head2D;
+
+	for (auto&& tick : BackTrack::backtrack_frames) {
+		for (auto&& record : tick.records) {
+
+			if ( debugOverlay->ScreenPosition( record.head, head2D ) )
+				continue;
+			Draw::AddCircleFilled( head2D.x, head2D.y, Settings::ESP::HeadDot::size, ESP::GetESPPlayerColor( player, false ), 3 );
+		}	
+	}
+}
+
 static void DrawBulletTrace( C_BasePlayer* player ) {
 	Vector src3D, dst3D, forward;
 	Vector src, dst;
@@ -1047,6 +1062,8 @@ static void DrawPlayer(C_BasePlayer* player)
 
 	if (Settings::ESP::HeadDot::enabled)
 		DrawHeaddot(player);
+
+	DrawBackTrack(player);
 
 	if (Settings::Debug::AutoWall::debugView)
 		DrawAutoWall(player);
