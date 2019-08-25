@@ -139,6 +139,8 @@ void Colors::RenderWindow()
 			{ "Glow - Chicken", &Settings::ESP::Glow::chickenColor },
 			{ "Sky", &Settings::NoSky::color },
 			{ "Walls", &Settings::ASUSWalls::color },
+			{ "BackTrack Chams - First", &Settings::BackTrack::Chams::firstcolor },
+			{ "BackTrack Chams - Fade", &Settings::BackTrack::Chams::fadecolor },
 	};
 
 	const char* colorNames[IM_ARRAYSIZE(colors)];

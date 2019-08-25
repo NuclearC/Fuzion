@@ -6,13 +6,18 @@
 #include "../interfaces.h"
 #include "../settings.h"
 
-bool enabled = true;
+bool Settings::BackTrack::enabled = false;
+int Settings::BackTrack::ticks = 13;
 
 std::vector<BackTrack::BackTrackFrameInfo> BackTrack::backtrack_frames;
 
 void RemoveInvalidTicks() {
+  const auto ticks =
+      ((Settings::BackTrack::ticks > 0) && (Settings::BackTrack::ticks < 40))
+          ? Settings::BackTrack::ticks
+          : 13;
   // TODO: xd
-  while (BackTrack::backtrack_frames.size() > 13)
+  while (BackTrack::backtrack_frames.size() > ticks)
     BackTrack::backtrack_frames.pop_back();
 }
 
@@ -84,7 +89,7 @@ void UpdateBackTrack(CUserCmd* cmd) {
 }
 
 void BackTrack::CreateMove(CUserCmd* cmd) {
-  if (!enabled) return;
+  if (!Settings::BackTrack::enabled) return;
   RemoveInvalidTicks();
   RegisterTicks();
   UpdateBackTrack(cmd);

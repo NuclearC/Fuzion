@@ -1024,6 +1024,16 @@ namespace Settings
 		extern bool adaptive;
 	}
 
+	namespace BackTrack {
+		extern bool enabled;
+		extern int ticks;
+		namespace Chams {
+			extern bool enabled;
+			extern ColorVar firstcolor;
+			extern ColorVar fadecolor;
+		}
+	}
+
 	namespace AutoAccept
 	{
 		extern bool enabled;

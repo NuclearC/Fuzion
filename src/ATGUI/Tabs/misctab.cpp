@@ -450,7 +450,19 @@ void Misc::RenderTab()
 			}
 			ImGui::Columns(1);
 			ImGui::Separator();
+			ImGui::Text(XORSTR("Backtrack"));
+			ImGui::Separator();
+			{
+				ImGui::Checkbox(XORSTR("BackTrack enabled"), &Settings::BackTrack::enabled);
+				ImGui::PushItemWidth(-1);
+				ImGui::SliderInt(XORSTR("##BACKTRACKTICKS"), &Settings::BackTrack::ticks, 0, 40, XORSTR("Ticks: %0.f"));
+				ImGui::PopItemWidth();
 
+				ImGui::Checkbox(XORSTR("BackTrack Chams Enabled"), &Settings::BackTrack::Chams::enabled);
+			}
+
+			ImGui::Columns(1);
+			ImGui::Separator();
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(210, 85));
 			if (ImGui::BeginPopupModal(XORSTR("Error###UNTRUSTED_FEATURE")))
 			{
