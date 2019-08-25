@@ -560,6 +560,13 @@ void Settings::LoadDefaultsOrSave(std::string path)
 	settings[XORSTR("FakeLag")][XORSTR("value")] = Settings::FakeLag::value;
 	settings[XORSTR("FakeLag")][XORSTR("adaptive")] = Settings::FakeLag::adaptive;
 
+	settings[XORSTR("BackTrack")][XORSTR("enabled")] = Settings::BackTrack::enabled;
+	settings[XORSTR("BackTrack")][XORSTR("ticks")] = Settings::BackTrack::ticks;
+	settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("enabled")] = Settings::BackTrack::Chams::enabled;
+	settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("drawlastonly")] = Settings::BackTrack::Chams::drawlastonly;
+	LoadColor(settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("firstcolor")], Settings::BackTrack::Chams::firstcolor);
+	LoadColor(settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("fadecolor")], Settings::BackTrack::Chams::fadecolor);
+
 	settings[XORSTR("AutoAccept")][XORSTR("enabled")] = Settings::AutoAccept::enabled;
 
 	settings[XORSTR("NoSky")][XORSTR("enabled")] = Settings::NoSky::enabled;
@@ -1132,6 +1139,13 @@ void Settings::LoadConfig(std::string path)
 	GetVal(settings[XORSTR("FakeLag")][XORSTR("enabled")], &Settings::FakeLag::enabled);
 	GetVal(settings[XORSTR("FakeLag")][XORSTR("value")], &Settings::FakeLag::value);
 	GetVal(settings[XORSTR("FakeLag")][XORSTR("adaptive")], &Settings::FakeLag::adaptive);
+
+	GetVal(settings[XORSTR("BackTrack")][XORSTR("enabled")], &Settings::BackTrack::enabled);
+	GetVal(settings[XORSTR("BackTrack")][XORSTR("ticks")], &Settings::BackTrack::ticks);
+	GetVal(	settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("enabled")], &Settings::BackTrack::Chams::enabled);
+	GetVal(	settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("drawlastonly")], &Settings::BackTrack::Chams::drawlastonly);
+	GetVal(	settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("firstcolor")], &Settings::BackTrack::Chams::firstcolor);
+	GetVal(	settings[XORSTR("BackTrack")][XORSTR("Chams")][XORSTR("fadecolor")], &Settings::BackTrack::Chams::fadecolor);
 
 	GetVal(settings[XORSTR("AutoAccept")][XORSTR("enabled")], &Settings::AutoAccept::enabled);
 

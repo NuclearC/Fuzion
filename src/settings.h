@@ -1029,6 +1029,7 @@ namespace Settings
 		extern int ticks;
 		namespace Chams {
 			extern bool enabled;
+			extern bool drawlastonly;
 			extern ColorVar firstcolor;
 			extern ColorVar fadecolor;
 		}

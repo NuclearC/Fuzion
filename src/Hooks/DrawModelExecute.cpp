@@ -14,6 +14,7 @@ typedef void (*DrawModelExecuteFn)(void*, void*, void*,
 IMaterial* material_backtrack;
 
 bool Settings::BackTrack::Chams::enabled = false;
+bool Settings::BackTrack::Chams::drawlastonly = false;
 ColorVar Settings::BackTrack::Chams::firstcolor =
     ColorVar(ImColor(1.f, 1.f, 1.f));
 ColorVar Settings::BackTrack::Chams::fadecolor =
@@ -39,11 +40,14 @@ void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
     Color color;
 
     const auto max_ticks = BackTrack::backtrack_frames.size();
-    for (auto&& frame : BackTrack::backtrack_frames) {
-      for (auto&& ticks : frame.records) {
+
+    if (Settings::BackTrack::Chams::drawlastonly) {
+      for (auto&& ticks : BackTrack::backtrack_frames.back().records) {
         if (pInfo.entity_index < engine->GetMaxClients() &&
             entityList->GetClientEntity(pInfo.entity_index) == ticks.entity) {
-          auto tick_difference = (globalVars->tickcount - frame.tick_count);
+          auto tick_difference =
+              (globalVars->tickcount -
+               BackTrack::backtrack_frames.back().tick_count);
           if (tick_difference <= 1) continue;
           color.r = first_color.r +
                     (fade_color.r - first_color.r) *
@@ -62,9 +66,38 @@ void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
           modelRender->ForcedMaterialOverride(material_backtrack);
           modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(
               thisptr, context, state, pInfo, (matrix3x4_t*)ticks.bone_matrix);
+          modelRender->ForcedMaterialOverride(nullptr);
         }
       }
-    }
+    } else
+      for (auto&& frame : BackTrack::backtrack_frames) {
+        for (auto&& ticks : frame.records) {
+          if (pInfo.entity_index < engine->GetMaxClients() &&
+              entityList->GetClientEntity(pInfo.entity_index) == ticks.entity) {
+            auto tick_difference = (globalVars->tickcount - frame.tick_count);
+            if (tick_difference <= 1) continue;
+            color.r = first_color.r +
+                      (fade_color.r - first_color.r) *
+                          (1 - (float)tick_difference / (float)max_ticks);
+            color.g = first_color.g +
+                      (fade_color.g - first_color.g) *
+                          (1 - (float)tick_difference / (float)max_ticks);
+            color.b = first_color.b +
+                      (fade_color.b - first_color.b) *
+                          (1 - (float)tick_difference / (float)max_ticks);
+
+            material_backtrack->ColorModulate(color);
+            material_backtrack->AlphaModulate(
+                0.3 + 0.5 * (1 - (float)tick_difference / (float)max_ticks));
+
+            modelRender->ForcedMaterialOverride(material_backtrack);
+            modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(
+                thisptr, context, state, pInfo,
+                (matrix3x4_t*)ticks.bone_matrix);
+            modelRender->ForcedMaterialOverride(nullptr);
+          }
+        }
+      }
   }
 
   modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(

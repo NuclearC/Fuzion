@@ -459,6 +459,7 @@ void Misc::RenderTab()
 				ImGui::PopItemWidth();
 
 				ImGui::Checkbox(XORSTR("BackTrack Chams Enabled"), &Settings::BackTrack::Chams::enabled);
+				ImGui::Checkbox(XORSTR("BackTrack Draw Last Only"), &Settings::BackTrack::Chams::drawlastonly);
 			}
 
 			ImGui::Columns(1);
