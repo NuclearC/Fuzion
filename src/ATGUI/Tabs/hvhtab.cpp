@@ -9,7 +9,7 @@
 void HvH::RenderTab()
 {
     const char* yTypes[] = {
-            "NONE", "MAX_DELTA_LEFT", "MAX_DELTA_RIGHT", "MAX_DELTA_FLIPPER", "MAX_DELTA_LBY_AVOID"
+            "NONE", "MAX_DELTA_LEFT", "MAX_DELTA_RIGHT", "MAX_DELTA_FLIPPER", "MAX_DELTA_LBY_AVOID", "DESYNC"
     };
 
     const char* xTypes[] = {
@@ -39,7 +39,10 @@ void HvH::RenderTab()
                     ImGui::Combo(XORSTR("##YFAKETYPE"), (int*)& Settings::AntiAim::Yaw::typeFake, yTypes, IM_ARRAYSIZE(yTypes));
 
                     ImGui::Combo(XORSTR("##YACTUALTYPE"), (int*)& Settings::AntiAim::Yaw::type, yTypes, IM_ARRAYSIZE(yTypes));
+
+                    ImGui::SliderInt(XORSTR("##MANUALOFFSET"), &Settings::AntiAim::Yaw::manualOffset, -180, 180, XORSTR("Manual Offset: %0.f"));
                     ImGui::PopItemWidth();
+                    ImGui::Checkbox(XORSTR("Negative Flicks(no legit)"), &Settings::AntiAim::Yaw::doNegativeFlicks);
                 }
                 ImGui::Columns(1);
                 ImGui::Separator();

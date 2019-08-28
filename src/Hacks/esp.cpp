@@ -1104,8 +1104,6 @@ static void DrawPlayer(C_BasePlayer* player) {
 
   if (Settings::ESP::HeadDot::enabled) DrawHeaddot(player);
 
-  DrawBackTrack(player);
-
   if (Settings::Debug::AutoWall::debugView) DrawAutoWall(player);
 
   if (Settings::Debug::BoneMap::draw) DrawBoneMap(player);

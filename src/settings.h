@@ -149,6 +149,7 @@ enum class ShowedAngle : int
 {
     REAL,
     FAKE,
+		BOTH,
 };
 
 enum class AntiAimType_Y : int
@@ -158,6 +159,7 @@ enum class AntiAimType_Y : int
 	MAX_DELTA_RIGHT,
     MAX_DELTA_FLIPPER,
     MAX_DELTA_LBY_AVOID,
+		DESYNC,
 };
 
 enum class AntiAimType_X : int
@@ -562,6 +564,8 @@ namespace Settings
             extern bool enabled;
             extern AntiAimType_Y type;
             extern AntiAimType_Y typeFake;
+						extern int manualOffset;
+						extern bool doNegativeFlicks;
         }
 
         namespace Pitch
