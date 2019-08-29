@@ -160,6 +160,7 @@ enum class AntiAimType_Y : int
     MAX_DELTA_FLIPPER,
     MAX_DELTA_LBY_AVOID,
 		DESYNC,
+		CUSTOM
 };
 
 enum class AntiAimType_X : int
@@ -1026,6 +1027,11 @@ namespace Settings
 		extern bool enabled;
 		extern int value;
 		extern bool adaptive;
+	}
+
+	namespace FakeLatency {
+		extern bool enabled;
+		extern int value;
 	}
 
 	namespace BackTrack {

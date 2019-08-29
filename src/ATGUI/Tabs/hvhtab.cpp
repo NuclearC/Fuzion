@@ -9,7 +9,7 @@
 void HvH::RenderTab()
 {
     const char* yTypes[] = {
-            "NONE", "MAX_DELTA_LEFT", "MAX_DELTA_RIGHT", "MAX_DELTA_FLIPPER", "MAX_DELTA_LBY_AVOID", "DESYNC"
+            "NONE", "MAX_DELTA_LEFT", "MAX_DELTA_RIGHT", "MAX_DELTA_FLIPPER", "MAX_DELTA_LBY_AVOID", "DESYNC", "CUSTOM"
     };
 
     const char* xTypes[] = {

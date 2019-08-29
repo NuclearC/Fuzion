@@ -8,15 +8,13 @@
 #include "../Hacks/chams.h"
 #include "../Hacks/esp.h"
 #include "../Hacks/thirdperson.h"
-#include "../Utils/xorstring.h"
 #include "../Utils/math.h"
+#include "../Utils/xorstring.h"
 
 typedef void (*DrawModelExecuteFn)(void*, void*, void*,
                                    const ModelRenderInfo_t&, matrix3x4_t*);
 
 IMaterial* material_backtrack;
-
-matrix3x4_t antiaim_fake_bones;
 
 bool Settings::BackTrack::Chams::enabled = false;
 bool Settings::BackTrack::Chams::drawlastonly = false;
@@ -34,9 +32,13 @@ void MatrixSetColumn(const Vector& in, int column, matrix3x4_t& out) {
 void AngleMatrix(const QAngle& angles, matrix3x4_t& matrix) {
   float sr, sp, sy, cr, cp, cy;
 
-  Math::SinCos(DEG2RAD(angles[YAW]), &sy, &cy);
-  Math::SinCos(DEG2RAD(angles[PITCH]), &sp, &cp);
-  Math::SinCos(DEG2RAD(angles[ROLL]), &sr, &cr);
+  sy = std::sin(DEG2RAD(angles[YAW]));
+  sp = std::sin(DEG2RAD(angles[PITCH]));
+  sr = std::sin(DEG2RAD(angles[ROLL]));
+
+  cy = std::cos(DEG2RAD(angles[YAW]));
+  cp = std::cos(DEG2RAD(angles[PITCH]));
+  cr = std::cos(DEG2RAD(angles[ROLL]));
 
   // matrix = (YAW * PITCH) * ROLL
   matrix[0][0] = cp * cy;
@@ -60,9 +62,33 @@ void AngleMatrix(const QAngle& angles, matrix3x4_t& matrix) {
   matrix[2][3] = 0.0f;
 }
 
-void AngleMatrix(matrix3x4_t& matrix, const QAngle& angles, const Vector& position) {
+void AngleMatrix(matrix3x4_t& matrix, const QAngle& angles,
+                 const Vector& position) {
   AngleMatrix(angles, matrix);
   MatrixSetColumn(position, 3, matrix);
+}
+
+void MultiplyMatrix(const matrix3x4_t& in1, const matrix3x4_t& in2,
+                    matrix3x4_t& out) {
+  out = {};
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 4; j++) {
+      out[i][j] = 0;
+      for (int k = 0; k < 3; k++) {
+        out[i][j] += in1[i][k] * in2[k][j];
+      }
+    }
+  }
+
+  out[0][3] = 0.0f;
+  out[1][3] = 0.0f;
+  out[2][3] = 0.0f;
+}
+
+void VectorRotate(Vector v1, QAngle angle, Vector& out) {
+  matrix3x4_t tmpmat;
+  AngleMatrix(angle, tmpmat);
+  Math::VectorTransform(v1, tmpmat, out);
 }
 
 void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
@@ -80,15 +106,31 @@ void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
       pInfo.entity_index == engine->GetLocalPlayer()) {
     if (Settings::ThirdPerson::enabled &&
         Settings::ThirdPerson::type == ShowedAngle::BOTH) {
-      // AngleMatrix(antiaim_fake_bones, AntiAim::fakeAngle, pInfo.origin);
+      matrix3x4_t custom_bones[MAXSTUDIOBONES];
+      Vector BonePos, OutPos;
+      for (int i = 0; i < MAXSTUDIOBONES; i++) {
+        QAngle fake_angle = QAngle(0, AntiAim::fakeAngle.y, 0);
+        matrix3x4_t rotation_matrix;
+        AngleMatrix(fake_angle, rotation_matrix);
+        MultiplyMatrix(rotation_matrix, pCustomBoneToWorld[i], custom_bones[i]);
+        BonePos =
+            Vector(pCustomBoneToWorld[i][0][3], pCustomBoneToWorld[i][1][3],
+                   pCustomBoneToWorld[i][2][3]) -
+            pInfo.origin;
+        VectorRotate(BonePos, fake_angle, OutPos);
+        OutPos += pInfo.origin;
+        custom_bones[i][0][3] = OutPos.x;
+        custom_bones[i][1][3] = OutPos.y;
+        custom_bones[i][2][3] = OutPos.z;
+      }
 
-      // material_backtrack->ColorModulate(1.f, 1.f, 0.f);
-      // material_backtrack->AlphaModulate(1.f);
+      material_backtrack->ColorModulate(1.f, 1.f, 0.f);
+      material_backtrack->AlphaModulate(1.f);
 
-      // modelRender->ForcedMaterialOverride(material_backtrack);
-      // modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(
-      //     thisptr, context, state, pInfo, &antiaim_fake_bones);
-      // modelRender->ForcedMaterialOverride(nullptr);
+      modelRender->ForcedMaterialOverride(material_backtrack);
+      modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(
+          thisptr, context, state, pInfo, custom_bones);
+      modelRender->ForcedMaterialOverride(nullptr);
     }
   } else if (Settings::BackTrack::Chams::enabled) {
     const auto first_color = Color::FromImColor(
@@ -99,7 +141,7 @@ void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
 
     const auto max_ticks = BackTrack::backtrack_frames.size();
 
-    if (Settings::BackTrack::Chams::drawlastonly) {
+    if (Settings::BackTrack::Chams::drawlastonly && !BackTrack::backtrack_frames.empty()) {
       for (auto&& ticks : BackTrack::backtrack_frames.back().records) {
         if (pInfo.entity_index < engine->GetMaxClients() &&
             entityList->GetClientEntity(pInfo.entity_index) == ticks.entity) {
