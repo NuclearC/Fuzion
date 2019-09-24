@@ -28,6 +28,7 @@ float Settings::AntiAim::LBYBreaker::offset = 180.0f;
 
 QAngle AntiAim::realAngle;
 QAngle AntiAim::fakeAngle;
+QAngle AntiAim::calculatedDesyncAngle{0, 0, 0};
 
 float AntiAim::GetMaxDelta(CCSGOAnimState* animState) {
   float speedFraction =
@@ -47,7 +48,7 @@ float AntiAim::GetMaxDelta(CCSGOAnimState* animState) {
 
   delta = *(float*)((uintptr_t)animState + 0x3A4) * unk2;
 
-  return delta - 0.5f;
+  return delta;
 }
 
 static float Distance(Vector a, Vector b) {
@@ -122,24 +123,30 @@ static void DoAntiAimY(C_BasePlayer* const localplayer, QAngle& angle,
   const auto old_angle = angle;
 
   float maxDelta = AntiAim::GetMaxDelta(localplayer->GetAnimState());
-  static bool bFlip = false;
+
   // float lby = *localplayer->GetLowerBodyYawTarget();
+  static bool bFlip = false;
+  bFlip = !bFlip;
   switch (aa_type) {
     case AntiAimType_Y::MAX_DELTA_LEFT:
-      angle.y = AntiAim::fakeAngle.y - maxDelta;
+      if (!bSend) angle.y -= maxDelta;
       break;
     case AntiAimType_Y::MAX_DELTA_RIGHT:
-      angle.y = AntiAim::fakeAngle.y + maxDelta;
+      if (!bSend) angle.y += maxDelta;
       break;
     case AntiAimType_Y::MAX_DELTA_FLIPPER:
-      bFlip = !bFlip;
-      angle.y -= bFlip ? maxDelta : -maxDelta;
+      angle.y += bFlip ? maxDelta : -maxDelta;
       break;
     case AntiAimType_Y::MAX_DELTA_LBY_AVOID:
 
       break;
+    case AntiAimType_Y::CUSTOM_FLIPPER:
+      if (!bSend) angle.y += Settings::AntiAim::Yaw::manualOffset;
+      break;
+    case AntiAimType_Y::CUSTOM:
+      break;
     case AntiAimType_Y::DESYNC:
-      // angle.y += 180.f;
+      if (!bSend) angle.y += 180.f;
       break;
     default:
       break;
@@ -285,29 +292,35 @@ void AntiAim::CreateMove(CUserCmd* cmd) {
   }
 
   if (Settings::AntiAim::Yaw::enabled) {
-    if (Settings::AntiAim::Yaw::type == AntiAimType_Y::DESYNC) {
-      static bool choke = false;
-      if (!bSend) {
-        angle.y += choke ? Settings::AntiAim::Yaw::manualOffset
-                         : -Settings::AntiAim::Yaw::manualOffset;
-        angle.x += Settings::AntiAim::Yaw::manualOffset;
-        choke = !choke;
-        AntiAim::realAngle.y = angle.y;
-      } else {
-        AntiAim::fakeAngle.y = angle.y;
-      }
+    // if (Settings::AntiAim::Yaw::type == AntiAimType_Y::CUSTOM) {
+    //   static int turn_position = 0;
+    //   if (oldSideMove > 0.5f) {
+    //     turn_position = 2;
+    //   } else if (oldSideMove < -0.5f) {
+    //     turn_position = 1;
+    //   }
 
-      CreateMove::sendPacket = bSend;
-    } else if (Settings::AntiAim::Yaw::type == AntiAimType_Y::CUSTOM) {
-      angle.y += Settings::AntiAim::Yaw::manualOffset;
-      if (!bSend) {
-        AntiAim::realAngle.y = angle.y;
-      } else {
-        AntiAim::fakeAngle.y = angle.y;
-      }
+    //   const auto max_delta =
+    //   AntiAim::GetMaxDelta(localplayer->GetAnimState());
+    //   localplayer->GetAnimState();
+    //   calculatedDesyncAngle = {0, max_delta, 0};
 
-      CreateMove::sendPacket = bSend;
-    } else if (!needToFlick) {
+    //   angle.y += turn_position == 1 ? Settings::AntiAim::Yaw::manualOffset
+    //                                 : -Settings::AntiAim::Yaw::manualOffset;
+
+    //   if (Settings::AntiAim::Yaw::typeFake == AntiAimType_Y::DESYNC) {
+    //     if (!bSend) angle.y += 180.f;
+    //   }
+
+    //   if (!bSend) {
+    //     AntiAim::realAngle.y = angle.y;
+    //   } else {
+    //     AntiAim::fakeAngle.y = angle.y;
+    //   }
+
+    //   CreateMove::sendPacket = bSend;
+    // } else
+    if (!needToFlick) {
       DoAntiAimY(localplayer, angle, bSend);
 
       CreateMove::sendPacket = bSend;

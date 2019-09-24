@@ -70,7 +70,7 @@ void ThirdPerson::FrameStageNotify(ClientFrameStage_t stage) {
           *localplayer->GetVAngles() = AntiAim::fakeAngle;
           break;
         case ShowedAngle::BOTH: {
-          *localplayer->GetVAngles() = AntiAim::realAngle;
+          *localplayer->GetVAngles() = AntiAim::fakeAngle;
         } break;
       }
     }

@@ -17,6 +17,11 @@ void RemoveInvalidTicks() {
           ? Settings::BackTrack::ticks
           : 13;
   // TODO: xd
+  using namespace BackTrack;
+  for (auto it = backtrack_frames.begin(); it != backtrack_frames.end(); it++) {
+    
+  }
+
   while (BackTrack::backtrack_frames.size() > ticks)
     BackTrack::backtrack_frames.pop_back();
 }

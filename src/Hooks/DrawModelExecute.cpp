@@ -104,14 +104,19 @@ void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
 
   if (pInfo.entity_index < engine->GetMaxClients() &&
       pInfo.entity_index == engine->GetLocalPlayer()) {
+    const auto localplayer = entityList->GetClientEntity(pInfo.entity_index);
+    
     if (Settings::ThirdPerson::enabled &&
         Settings::ThirdPerson::type == ShowedAngle::BOTH) {
+
       matrix3x4_t custom_bones[MAXSTUDIOBONES];
-      Vector BonePos, OutPos;
+      QAngle fake_angle = AntiAim::calculatedDesyncAngle;
+
+      Math::NormalizeAngles(fake_angle);
+      matrix3x4_t rotation_matrix;
+      AngleMatrix(fake_angle, rotation_matrix);
       for (int i = 0; i < MAXSTUDIOBONES; i++) {
-        QAngle fake_angle = QAngle(0, AntiAim::fakeAngle.y, 0);
-        matrix3x4_t rotation_matrix;
-        AngleMatrix(fake_angle, rotation_matrix);
+        Vector BonePos{}, OutPos{};
         MultiplyMatrix(rotation_matrix, pCustomBoneToWorld[i], custom_bones[i]);
         BonePos =
             Vector(pCustomBoneToWorld[i][0][3], pCustomBoneToWorld[i][1][3],
@@ -141,7 +146,8 @@ void Hooks::DrawModelExecute(void* thisptr, void* context, void* state,
 
     const auto max_ticks = BackTrack::backtrack_frames.size();
 
-    if (Settings::BackTrack::Chams::drawlastonly && !BackTrack::backtrack_frames.empty()) {
+    if (Settings::BackTrack::Chams::drawlastonly &&
+        !BackTrack::backtrack_frames.empty()) {
       for (auto&& ticks : BackTrack::backtrack_frames.back().records) {
         if (pInfo.entity_index < engine->GetMaxClients() &&
             entityList->GetClientEntity(pInfo.entity_index) == ticks.entity) {

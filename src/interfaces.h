@@ -51,6 +51,7 @@ extern VMT* launcherMgrVMT;
 extern VMT* engineVGuiVMT;
 extern VMT* soundVMT;
 extern VMT* uiEngineVMT;
+extern VMT* netChannelVMT;
 
 extern LineGoesThroughSmokeFn LineGoesThroughSmoke;
 extern InitKeyValuesFn InitKeyValues;

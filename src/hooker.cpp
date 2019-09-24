@@ -27,6 +27,7 @@ VMT* launcherMgrVMT = nullptr;
 VMT* engineVGuiVMT = nullptr;
 VMT* soundVMT = nullptr;
 VMT* uiEngineVMT = nullptr;
+VMT* netChannelVMT = nullptr;
 
 uintptr_t oSwapWindow;
 uintptr_t* swapWindowJumpAddress = nullptr;

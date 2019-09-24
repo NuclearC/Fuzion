@@ -134,6 +134,13 @@ public:
 	}
 
 	template <typename... Values>
+	void ConsolePrintf(const char* szMsgFormat, Values... Parameters)
+	{
+		typedef void (* oConsoleDPrintf)(void*, const char*, ...);
+		return getvfunc<oConsoleDPrintf>(this, 26)(this, szMsgFormat, Parameters...);
+	}
+
+	template <typename... Values>
 	void ConsoleDPrintf(const char* szMsgFormat, Values... Parameters)
 	{
 		typedef void (* oConsoleDPrintf)(void*, const char*, ...);
