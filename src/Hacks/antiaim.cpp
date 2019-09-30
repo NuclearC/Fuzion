@@ -135,7 +135,7 @@ static void DoAntiAimY(C_BasePlayer* const localplayer, QAngle& angle,
       if (!bSend) angle.y += maxDelta;
       break;
     case AntiAimType_Y::MAX_DELTA_FLIPPER:
-      angle.y += bFlip ? maxDelta : -maxDelta;
+      angle.y += bSend ? 180.f : -maxDelta;
       break;
     case AntiAimType_Y::MAX_DELTA_LBY_AVOID:
 
